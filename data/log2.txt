@@ -1,0 +1,5 @@
+2025-09-29 10:03:15 INFO 192.168.0.5 Service started
+2025-09-29 10:05:30 WARNING 192.168.0.6 Memory usage high
+2025-09-29 10:06:22 ERROR 192.168.0.7 File not found
+2025-09-29 10:08:45 INFO 192.168.0.8 Request completed
+2025-09-29 10:09:59 ERROR 192.168.0.7 Permission denied

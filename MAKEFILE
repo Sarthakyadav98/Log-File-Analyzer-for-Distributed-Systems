@@ -1,0 +1,63 @@
+# ==============================
+# Parallel Log File Analyzer
+# ==============================
+CXX = g++
+CXXFLAGS = -std=c++17 -fopenmp -O2 -Wall
+INCLUDES = -Iinclude
+SRC_DIR = src
+BIN_DIR = bin
+
+# Targets
+SERIAL = $(BIN_DIR)/serial_analyzer
+PARALLEL = $(BIN_DIR)/parallel_analyzer
+BENCH = $(BIN_DIR)/benchmark
+MAIN = $(BIN_DIR)/main
+
+# Source files
+SRC_FILES = 
+OBJS = 
+
+# Create bin directory if not exists
+$(shell mkdir -p $(BIN_DIR))
+
+# Build all
+all: $(SERIAL) $(PARALLEL) $(BENCH) $(MAIN)
+
+$(SERIAL): $(SRC_DIR)/serial_analyzer.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@
+
+$(PARALLEL): $(SRC_DIR)/parallel_analyzer.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@
+
+$(BENCH): $(SRC_DIR)/benchmark.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@
+
+$(MAIN): $(SRC_DIR)/main.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@
+
+# Clean up
+clean:
+	rm -rf $(BIN_DIR)/*.o $(BIN_DIR)/serial_analyzer $(BIN_DIR)/parallel_analyzer $(BIN_DIR)/benchmark $(BIN_DIR)/main
+
+# Run options
+run-serial: $(SERIAL)
+	@$(SERIAL)
+
+run-parallel: $(PARALLEL)
+	@$(PARALLEL)
+
+run-bench: $(BENCH)
+	@$(BENCH)
+
+run-main: $(MAIN)
+	@$(MAIN)
+
+# Help
+help:
+	@echo "Makefile commands:"
+	@echo "  make all          - Build all binaries"
+	@echo "  make run-serial   - Run serial version"
+	@echo "  make run-parallel - Run parallel version"
+	@echo "  make run-bench    - Run benchmark comparison"
+	@echo "  make run-main     - Run interactive mode"
+	@echo "  make clean        - Remove binaries"
