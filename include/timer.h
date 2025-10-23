@@ -1,25 +1,23 @@
 #ifndef TIMER_H
 #define TIMER_H
 
-#include <chrono>
+#include <omp.h>  // OpenMP header
 
-// Simple Timer with elapsed() method
+// Simple Timer with elapsed() method using OpenMP
 class Timer {
 public:
-    using Clock = std::chrono::high_resolution_clock;
+    Timer() : start_(omp_get_wtime()) {}
 
-    Timer() : start_(Clock::now()) {}
-    void reset() { start_ = Clock::now(); }
+    // Reset the start time
+    void reset() { start_ = omp_get_wtime(); }
 
     // Return elapsed time in seconds (double)
     double elapsed() const {
-        auto end = Clock::now();
-        std::chrono::duration<double> diff = end - start_;
-        return diff.count();
+        return omp_get_wtime() - start_;
     }
 
 private:
-    Clock::time_point start_;
+    double start_;
 };
 
 #endif // TIMER_H
