@@ -8,7 +8,7 @@
 using namespace std;
 
 int main() {
-    vector<string> files = {"../data/log1.txt", "../data/log2.txt"};
+    vector<string> files = {"data/log1.txt", "data/log2.txt"};
     vector<string> logs = readMultipleLogs(files);
 
     Timer serialT;

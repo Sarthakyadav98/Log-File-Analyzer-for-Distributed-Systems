@@ -9,7 +9,7 @@ int main() {
     cout << "Choose mode:\n1. Serial\n2. Parallel\n> ";
     cin >> choice;
 
-    vector<string> files = {"../data/log1.txt", "../data/log2.txt"};
+    vector<string> files = {"data/log1.txt", "data/log2.txt"};
     vector<string> logs = readMultipleLogs(files);
 
     Timer t;

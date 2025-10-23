@@ -1,7 +1,7 @@
 # ==============================
 # Parallel Log File Analyzer
 # ==============================
-CXX = g++
+CXX = g++-15
 CXXFLAGS = -std=c++17 -fopenmp -O2 -Wall
 INCLUDES = -Iinclude
 SRC_DIR = src
@@ -55,9 +55,9 @@ run-main: $(MAIN)
 # Help
 help:
 	@echo "Makefile commands:"
-	@echo "  make all          - Build all binaries"
-	@echo "  make run-serial   - Run serial version"
-	@echo "  make run-parallel - Run parallel version"
-	@echo "  make run-bench    - Run benchmark comparison"
-	@echo "  make run-main     - Run interactive mode"
-	@echo "  make clean        - Remove binaries"
+	@echo "	make all          - Build all binaries"
+	@echo "	make run-serial   - Run serial version"
+	@echo "	make run-parallel - Run parallel version"
+	@echo "	make run-bench    - Run benchmark comparison"
+	@echo "	make run-main     - Run interactive mode"
+	@echo "	make clean        - Remove binaries"
