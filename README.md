@@ -18,7 +18,7 @@ It provides **serial and parallel implementations**, measures **performance spee
 
 ## ⚙️ Features
 ✅ Supports **multiple log files**  
-✅ Counts keyword frequencies  
+✅ Counts keyword   frequencies  
 ✅ Detects **top N frequent IPs**  
 ✅ Identifies **top N recurring error messages**  
 ✅ Tracks **error trends over time**  
@@ -27,3 +27,313 @@ It provides **serial and parallel implementations**, measures **performance spee
 ---
 
 ## 📂 Project Structure
+
+```
+📁 Project Root
+├── 📁 bin/                    # Compiled executables
+│   ├── benchmark             # Performance comparison tool
+│   ├── main                  # Interactive mode selector
+│   ├── parallel_analyzer     # Parallel analysis executable
+│   └── serial_analyzer       # Serial analysis executable
+├── 📁 data/                  # Sample log files
+│   ├── log1.txt             # Sample log file 1
+│   └── log2.txt             # Sample log file 2
+├── 📁 include/               # Header files
+│   ├── analyzer_utils.h     # Core analysis logic & data structures
+│   ├── log_parser.h         # File reading utilities
+│   └── timer.h              # Performance timing utilities
+├── 📁 results/               # Performance reports
+│   └── performance_report.csv
+├── 📁 src/                   # Source code files
+│   ├── benchmark.cpp        # Benchmark comparison implementation
+│   ├── main.cpp             # Interactive mode implementation
+│   ├── parallel_analyzer.cpp # Parallel analysis implementation
+│   └── serial_analyzer.cpp  # Serial analysis implementation
+├── MAKEFILE                  # Build configuration
+└── README.md                 # This file
+```
+
+---
+
+## 🔧 Technical Implementation
+
+### Core Components
+
+#### 1. **LogStats Structure** (`analyzer_utils.h`)
+```cpp
+struct LogStats {
+    int infoCount = 0;
+    int errorCount = 0;
+    int warningCount = 0;
+    int debugCount = 0;
+    std::unordered_map<std::string, int> ipCount;
+    std::unordered_map<std::string, int> errorMessages;
+};
+```
+- Stores analysis results with keyword counts and frequency maps
+- Uses `unordered_map` for efficient O(1) lookups
+
+#### 2. **Serial Analysis** (`analyzer_utils.h`)
+```cpp
+LogStats analyzeLogsSerial(const std::vector<std::string>& logs)
+```
+- **Algorithm**: Sequential processing of log lines
+- **Time Complexity**: O(n) where n = number of log lines
+- **Space Complexity**: O(1) for counters, O(k) for maps where k = unique IPs/errors
+- **Process**: Iterates through each log line, checks for keywords using `string::find()`
+
+#### 3. **Parallel Analysis** (`analyzer_utils.h`)
+```cpp
+LogStats analyzeLogsParallel(const std::vector<std::string>& logs, int numThreads = 4)
+```
+- **Algorithm**: OpenMP parallel processing with reduction operations
+- **Parallelization Strategy**: `#pragma omp parallel for` with `reduction(+:info, error, warning, debug)`
+- **Thread Management**: Default 4 threads, configurable via parameter
+- **Synchronization**: Uses OpenMP reduction to safely combine results from multiple threads
+
+#### 4. **Timer Implementation** (`timer.h`)
+```cpp
+class Timer {
+    double start_;
+public:
+    Timer() : start_(omp_get_wtime()) {}
+    double elapsed() const { return omp_get_wtime() - start_; }
+};
+```
+- Uses OpenMP's high-resolution timer (`omp_get_wtime()`)
+- Provides microsecond precision for accurate performance measurement
+
+#### 5. **File I/O** (`log_parser.h`)
+```cpp
+std::vector<std::string> readLogFile(const std::string& filename)
+std::vector<std::string> readMultipleLogs(const std::vector<std::string>& filenames)
+```
+- **Error Handling**: Graceful file opening with error messages
+- **Memory Management**: Efficient vector-based storage
+- **Multi-file Support**: Concatenates multiple log files into single vector
+
+### Analysis Workflow
+
+#### **Serial Workflow**:
+1. **File Reading**: Load all log files into memory
+2. **Sequential Processing**: Iterate through each log line
+3. **Keyword Detection**: Use `string::find()` for pattern matching
+4. **Result Aggregation**: Update counters and maps
+5. **Output Generation**: Display formatted results
+
+#### **Parallel Workflow**:
+1. **File Reading**: Load all log files into memory (same as serial)
+2. **Thread Initialization**: OpenMP creates worker threads
+3. **Work Distribution**: Each thread processes a subset of log lines
+4. **Local Processing**: Each thread maintains local counters
+5. **Reduction Phase**: OpenMP combines results from all threads
+6. **Output Generation**: Display formatted results
+
+### Performance Characteristics
+
+#### **Serial Implementation**:
+- **Pros**: Simple, predictable memory usage, no synchronization overhead
+- **Cons**: Limited by single-core performance, no scalability
+- **Best For**: Small datasets, debugging, baseline comparison
+
+#### **Parallel Implementation**:
+- **Pros**: Utilizes multiple cores, scales with hardware, significant speedup potential
+- **Cons**: Thread creation overhead, memory bandwidth limitations
+- **Best For**: Large datasets, multi-core systems, production environments
+
+---
+
+## 🚀 Usage Instructions
+
+### **Prerequisites**
+- **Compiler**: GCC 15+ with OpenMP support
+- **Operating System**: Linux/Unix (Windows with WSL recommended)
+- **Dependencies**: OpenMP library
+
+### **Build Process**
+```bash
+# Build all executables
+make all
+
+# Build specific components
+make serial    # Serial analyzer only
+make parallel  # Parallel analyzer only
+make benchmark # Benchmark tool only
+make main      # Interactive mode only
+```
+
+### **Execution Modes**
+
+#### **1. Interactive Mode** (`./bin/main`)
+```bash
+make run-main
+# Choose mode:
+# 1. Serial
+# 2. Parallel
+```
+
+#### **2. Direct Execution**
+```bash
+# Serial analysis
+make run-serial
+./bin/serial_analyzer
+
+# Parallel analysis  
+make run-parallel
+./bin/parallel_analyzer
+
+# Performance comparison
+make run-bench
+./bin/benchmark
+```
+
+#### **3. Custom Analysis**
+```cpp
+// In your own code
+#include "include/log_parser.h"
+#include "include/analyzer_utils.h"
+#include "include/timer.h"
+
+vector<string> files = {"data/log1.txt", "data/log2.txt"};
+vector<string> logs = readMultipleLogs(files);
+
+Timer t;
+LogStats result = analyzeLogsParallel(logs);  // or analyzeLogsSerial(logs)
+double time = t.elapsed();
+
+displayResults(result);
+cout << "Execution Time: " << time << " seconds\n";
+```
+
+---
+
+## 📊 Performance Analysis
+
+### **Benchmarking Features**
+- **Automatic Comparison**: Serial vs Parallel execution times
+- **Speedup Calculation**: `speedup = serial_time / parallel_time`
+- **Efficiency Metrics**: `efficiency = speedup / num_threads * 100%`
+- **CSV Export**: Results saved to `results/performance_report.csv`
+
+### **Expected Performance**
+- **Small Files** (< 1MB): Minimal speedup due to overhead
+- **Medium Files** (1-100MB): 2-3x speedup on 4-core systems
+- **Large Files** (> 100MB): 3-4x speedup on 4-core systems
+- **Memory Usage**: Linear with file size, ~2x file size in RAM
+
+### **Optimization Strategies**
+1. **Thread Count Tuning**: Adjust `numThreads` parameter based on CPU cores
+2. **Memory Management**: Process files in chunks for very large datasets
+3. **I/O Optimization**: Use memory-mapped files for massive log files
+4. **Cache Optimization**: Ensure log files fit in CPU cache for best performance
+
+---
+
+## 🔍 Sample Output
+
+### **Analysis Results**
+```
+=== Keyword Frequency ===
+INFO    : 3
+ERROR   : 4
+WARNING : 2
+DEBUG   : 1
+
+=== Top IPs ===
+192.168.0.2 -> 2 times
+192.168.0.7 -> 2 times
+192.168.0.1 -> 1 times
+
+=== Top Error Messages ===
+"Database connection failed" -> 1 times
+"Timeout occurred" -> 1 times
+"File not found" -> 1 times
+```
+
+### **Benchmark Results**
+```
+=== BENCHMARK RESULTS ===
+Serial Time   : 0.001234 s
+Parallel Time : 0.000456 s
+Speedup       : 2.706x
+Efficiency    : 67.65 % (approx)
+```
+
+---
+
+## 🛠️ Development & Customization
+
+### **Adding New Analysis Features**
+1. **Extend LogStats**: Add new fields to the structure
+2. **Update Analysis Functions**: Modify both serial and parallel versions
+3. **Enhance Display**: Update `displayResults()` function
+4. **Test Performance**: Run benchmarks to ensure parallel efficiency
+
+### **Configuration Options**
+- **Thread Count**: Modify `numThreads` parameter in `analyzer_utils.h`
+- **Top N Results**: Change `topN` parameter in `displayResults()`
+- **Compiler Flags**: Adjust `CXXFLAGS` in `MAKEFILE`
+- **File Paths**: Update file paths in source files
+
+### **Debugging Tips**
+- **Serial First**: Always test serial version before parallel
+- **Small Datasets**: Use small log files for initial testing
+- **Thread Safety**: Ensure no shared state modifications in parallel code
+- **Memory Leaks**: Use valgrind for memory debugging
+
+---
+
+## 📈 Future Enhancements
+
+### **Planned Features**
+- **Real-time Processing**: Stream processing for live log analysis
+- **Distributed Computing**: MPI support for cluster processing
+- **Advanced Analytics**: Machine learning-based anomaly detection
+- **Web Interface**: REST API for remote analysis
+- **Database Integration**: Store results in SQL/NoSQL databases
+
+### **Performance Improvements**
+- **SIMD Instructions**: Vectorized string processing
+- **Memory Mapping**: Zero-copy file reading
+- **Lock-free Data Structures**: Eliminate synchronization overhead
+- **GPU Acceleration**: CUDA/OpenCL support for massive datasets
+
+---
+
+## 🤝 Contributing
+
+### **Code Style**
+- **C++17 Standard**: Use modern C++ features
+- **OpenMP Best Practices**: Proper reduction usage
+- **Memory Management**: RAII principles
+- **Error Handling**: Comprehensive error checking
+
+### **Testing**
+- **Unit Tests**: Test individual functions
+- **Integration Tests**: Test complete workflows
+- **Performance Tests**: Benchmark on various datasets
+- **Regression Tests**: Ensure no performance degradation
+
+---
+
+## 📚 References
+
+- **OpenMP Documentation**: [OpenMP.org](https://www.openmp.org/)
+- **C++17 Standard**: [cppreference.com](https://en.cppreference.com/)
+- **Parallel Computing**: "Introduction to Parallel Computing" by Ananth Grama
+- **Performance Optimization**: "Computer Systems: A Programmer's Perspective"
+
+---
+
+## 📄 License
+
+This project is developed for educational purposes as part of the Parallel and Distributed Computing course at IIIT Kottayam.
+
+---
+
+## 👥 Team
+
+**Course**: Parallel and Distributed Computing (PDC)  
+**Institution**: Indian Institute of Information Technology, Kottayam  
+**Semester**: 5th Semester  
+**Academic Year**: 2024-25
