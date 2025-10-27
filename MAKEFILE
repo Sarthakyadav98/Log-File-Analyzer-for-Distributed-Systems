@@ -12,6 +12,7 @@ SERIAL = $(BIN_DIR)/serial_analyzer
 PARALLEL = $(BIN_DIR)/parallel_analyzer
 BENCH = $(BIN_DIR)/benchmark
 MAIN = $(BIN_DIR)/main
+RUN_BENCH = $(BIN_DIR)/run_benchmark
 
 # Source files
 SRC_FILES = 
@@ -21,7 +22,7 @@ OBJS =
 $(shell mkdir -p $(BIN_DIR))
 
 # Build all
-all: $(SERIAL) $(PARALLEL) $(BENCH) $(MAIN)
+all: $(SERIAL) $(PARALLEL) $(BENCH) $(MAIN) $(RUN_BENCH)
 
 $(SERIAL): $(SRC_DIR)/serial_analyzer.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@
@@ -35,9 +36,12 @@ $(BENCH): $(SRC_DIR)/benchmark.cpp
 $(MAIN): $(SRC_DIR)/main.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@
 
+$(RUN_BENCH): $(SRC_DIR)/run_benchmark.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@
+
 # Clean up
 clean:
-	rm -rf $(BIN_DIR)/*.o $(BIN_DIR)/serial_analyzer $(BIN_DIR)/parallel_analyzer $(BIN_DIR)/benchmark $(BIN_DIR)/main
+	rm -rf $(BIN_DIR)/*.o $(BIN_DIR)/serial_analyzer $(BIN_DIR)/parallel_analyzer $(BIN_DIR)/benchmark $(BIN_DIR)/main $(BIN_DIR)/run_benchmark
 
 # Run options
 run-serial: $(SERIAL)
@@ -51,6 +55,9 @@ run-bench: $(BENCH)
 
 run-main: $(MAIN)
 	@$(MAIN)
+
+run-bench-all: $(RUN_BENCH)
+	@$(RUN_BENCH)
 
 # Help
 help:
