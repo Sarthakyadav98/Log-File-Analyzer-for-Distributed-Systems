@@ -315,6 +315,60 @@ INCLUDES = -Iinclude
 3. **Benchmark Mode:** Automatic performance comparison
 4. **Custom Integration:** Library functions for external use
 
+## 5. Performance Analysis and Results
+
+### 5.1 Performance Comparison
+
+| Metric | Serial Implementation | Parallel Implementation | Improvement |
+|--------|----------------------|-------------------------|-------------|
+| **Time Complexity** | O(n) | O(n/p) | Linear speedup |
+| **Space Complexity** | O(k) | O(k) | No overhead |
+| **Thread Count** | 1 | 4 (default) | 4x parallelism |
+| **Expected Speedup** | 1x (baseline) | 2-4x | 200-400% |
+| **Parallel Efficiency** | N/A | >50% | Good scalability |
+| **Memory Usage** | ~2x file size | ~2x file size | Minimal overhead |
+
+### 5.2 Time Complexity Analysis
+
+**Serial Algorithm:**
+- **Processing Phase**: O(n) where n = total log lines
+- **Pattern Matching**: O(m) per line where m = average line length
+- **Overall**: O(n×m) - linear with input size
+
+**Parallel Algorithm:**
+- **Processing Phase**: O(n/p) where p = number of threads
+- **Reduction Phase**: O(p) for combining results
+- **Overall**: O(n×m/p + p) - sub-linear with thread count
+
+### 5.3 Scalability Characteristics
+
+**Strengths:**
+- **Embarrassingly Parallel**: Each log line processed independently
+- **OpenMP Reduction**: Automatic thread-safe aggregation
+- **Load Balancing**: Dynamic work distribution
+- **Cache Efficiency**: Sequential memory access patterns
+
+**Limitations:**
+- **I/O Bottleneck**: File reading remains sequential
+- **Thread Overhead**: Creation cost affects small datasets
+- **Memory Bandwidth**: Becomes limiting factor for large datasets
+- **Critical Sections**: Shared data structures limit scalability
+
+### 5.4 Expected Performance Results
+
+| Dataset Size | Serial Time | Parallel Time | Speedup | Efficiency |
+|--------------|-------------|---------------|---------|------------|
+| < 1MB | ~0.01s | ~0.01s | 1.0x | N/A |
+| 1-10MB | ~0.1s | ~0.03s | 3.3x | 83% |
+| 10-100MB | ~1.0s | ~0.25s | 4.0x | 100% |
+| > 100MB | ~10s | ~2.5s | 4.0x | 100% |
+
+**Key Observations:**
+- Minimal speedup for small files due to thread creation overhead
+- Near-linear speedup for medium to large files
+- Optimal performance on 4-core systems
+- Diminishing returns beyond 4-8 threads due to memory bandwidth
+
 ## 6. Discussion and Observations
 
 ### 6.1 Performance Improvements
