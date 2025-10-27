@@ -7,6 +7,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
+#include <sstream>
 #include <omp.h>
 
 struct LogStats {
@@ -23,9 +24,28 @@ inline LogStats analyzeLogsSerial(const std::vector<std::string>& logs) {
     LogStats stats;
     for (const auto& line : logs) {
         if (line.find("INFO") != std::string::npos) stats.infoCount++;
-        if (line.find("ERROR") != std::string::npos) stats.errorCount++;
+        if (line.find("ERROR") != std::string::npos) {
+            stats.errorCount++;
+            // Extract error message (text after IP address)
+            std::istringstream iss(line);
+            std::string date, time, level, ip, message;
+            iss >> date >> time >> level >> ip;
+            std::getline(iss, message);
+            message.erase(0, message.find_first_not_of(" \t")); // trim leading whitespace
+            if (!message.empty()) {
+                stats.errorMessages[message]++;
+            }
+        }
         if (line.find("WARNING") != std::string::npos) stats.warningCount++;
         if (line.find("DEBUG") != std::string::npos) stats.debugCount++;
+        
+        // Extract IP address (assuming format: date time level IP message)
+        std::istringstream iss(line);
+        std::string date, time, level, ip;
+        iss >> date >> time >> level >> ip;
+        if (!ip.empty() && ip.find('.') != std::string::npos) {
+            stats.ipCount[ip]++;
+        }
     }
     return stats;
 }
@@ -34,14 +54,43 @@ inline LogStats analyzeLogsSerial(const std::vector<std::string>& logs) {
 inline LogStats analyzeLogsParallel(const std::vector<std::string>& logs, int numThreads = 4) {
     LogStats stats;
     int info = 0, error = 0, warning = 0, debug = 0;
+    
+    // For thread-safe operations on maps, we'll use critical sections
+    std::unordered_map<std::string, int> localIpCount;
+    std::unordered_map<std::string, int> localErrorMessages;
 
     #pragma omp parallel for num_threads(numThreads) reduction(+:info, error, warning, debug)
     for (int i = 0; i < (int)logs.size(); ++i) {
         const auto& line = logs[i];
         if (line.find("INFO") != std::string::npos) info++;
-        if (line.find("ERROR") != std::string::npos) error++;
+        if (line.find("ERROR") != std::string::npos) {
+            error++;
+            // Extract error message (text after IP address)
+            std::istringstream iss(line);
+            std::string date, time, level, ip, message;
+            iss >> date >> time >> level >> ip;
+            std::getline(iss, message);
+            message.erase(0, message.find_first_not_of(" \t")); // trim leading whitespace
+            if (!message.empty()) {
+                #pragma omp critical
+                {
+                    stats.errorMessages[message]++;
+                }
+            }
+        }
         if (line.find("WARNING") != std::string::npos) warning++;
         if (line.find("DEBUG") != std::string::npos) debug++;
+        
+        // Extract IP address (assuming format: date time level IP message)
+        std::istringstream iss(line);
+        std::string date, time, level, ip;
+        iss >> date >> time >> level >> ip;
+        if (!ip.empty() && ip.find('.') != std::string::npos) {
+            #pragma omp critical
+            {
+                stats.ipCount[ip]++;
+            }
+        }
     }
 
     stats.infoCount = info;
