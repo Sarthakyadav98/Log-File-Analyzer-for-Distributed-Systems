@@ -1,0 +1,8 @@
+Log File,NumLines,SerialTime(s),ParallelTime(s),Speedup,Efficiency(%)
+data/log1.txt,5,0.000005,0.000020,0.24,5.88
+data/log2.txt,5,0.000003,0.000018,0.19,4.72
+data/log_small.txt,100,0.000057,0.000068,0.84,21.01
+data/log_medium.txt,1000,0.000503,0.000364,1.38,34.60
+data/log_large.txt,10000,0.004824,0.003321,1.45,36.31
+data/log_xlarge.txt,50000,0.024363,0.016114,1.51,37.80
+data/log_xxlarge.txt,100000,0.048540,0.031914,1.52,38.02
