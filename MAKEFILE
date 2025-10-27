@@ -1,7 +1,7 @@
 # ==============================
 # Parallel Log File Analyzer
 # ==============================
-CXX = g++-15
+CXX =  /opt/homebrew/bin/g++-15
 CXXFLAGS = -std=c++17 -fopenmp -O2 -Wall
 INCLUDES = -Iinclude
 SRC_DIR = src
