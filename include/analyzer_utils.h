@@ -66,7 +66,7 @@ inline LogStats analyzeLogsParallel(const std::vector<std::string>& logs, int nu
         if (line.find("ERROR") != std::string::npos) {
             error++;
             // Extract error message (text after IP address)
-            std::istringstream iss(line);
+            std::istringstream iss(line);   
             std::string date, time, level, ip, message;
             iss >> date >> time >> level >> ip;
             std::getline(iss, message);
