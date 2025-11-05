@@ -3,6 +3,7 @@
 #include <fstream>
 #include <regex>
 #include <filesystem>
+#include <algorithm>
 
 namespace fs = std::filesystem;
 
@@ -18,12 +19,24 @@ std::vector<LogEntry> preprocessLogFile(const std::string &inputPath) {
     std::string line;
     // Handles multiple date-time formats (2025-09-29, 29/09/2025, etc.)
     std::regex logPattern(
-        R"((\d{4}[-/]\d{2}[-/]\d{2}|\d{2}[-/]\d{2}[-/]\d{4})\s+(\d{2}:\d{2}:\d{2})\s+(\w+)\s+([\d\.]+)\s+(.*))"
+        R"((\d{4}[-/]\d{2}[-/]\d{2}|\d{2}[-/]\d{2}[-/]\d{4})\s+(\d{2}:\d{2}:\d{2})\s+(\w+)\s+([\d\.]+)\s+(.*))",
+        std::regex_constants::icase
     );
     std::smatch match;
 
     while (std::getline(infile, line)) {
-        if (std::regex_match(line, match, logPattern)) {
+        // Normalize line endings and trim leading/trailing whitespace
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+        // trim left
+        line.erase(line.begin(), std::find_if(line.begin(), line.end(), [](unsigned char ch){ return !std::isspace(ch); }));
+        // trim right
+        line.erase(std::find_if(line.rbegin(), line.rend(), [](unsigned char ch){ return !std::isspace(ch); }).base(), line.end());
+
+        if (line.empty()) {
+            continue;
+        }
+
+        if (std::regex_search(line, match, logPattern)) {
             LogEntry entry;
             // Normalize timestamp (convert DD/MM/YYYY → YYYY-MM-DD)
             std::string date = match[1];

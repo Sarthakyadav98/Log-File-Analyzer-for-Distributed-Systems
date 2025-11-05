@@ -6,6 +6,8 @@ CXXFLAGS = -std=c++17 -fopenmp -O2 -Wall
 INCLUDES = -Iinclude
 SRC_DIR = src
 BIN_DIR = bin
+RAW_DIR = data/raw
+CLEAN_DIR = data/clean
 
 # Targets
 SERIAL = $(BIN_DIR)/serial_analyzer
@@ -19,8 +21,9 @@ PREPROC = $(BIN_DIR)/preprocessor
 SRC_FILES = 
 OBJS = 
 
-# Create bin directory if not exists
+# Create output directories if not exists
 $(shell mkdir -p $(BIN_DIR))
+$(shell mkdir -p $(CLEAN_DIR))
 
 # Build all
 all: $(SERIAL) $(PARALLEL) $(BENCH) $(MAIN) $(RUN_BENCH) $(PREPROC)
@@ -64,7 +67,10 @@ run-bench-all: $(RUN_BENCH)
 	@$(RUN_BENCH)
 
 run-preprocessor: preprocessor
-	@$(PREPROC)
+	@$(PREPROC) $(RAW_DIR) $(CLEAN_DIR)
+
+# Convenience alias
+preprocess-data: run-preprocessor
 
 # Help
 help:
