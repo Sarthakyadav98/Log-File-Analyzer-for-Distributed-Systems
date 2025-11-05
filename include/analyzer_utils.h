@@ -17,6 +17,7 @@ struct LogStats {
     int debugCount = 0;
     std::unordered_map<std::string, int> ipCount;
     std::unordered_map<std::string, int> errorMessages;
+    std::unordered_map<std::string, int> warningMessages;
 };
 
 // --- Serial Analysis ---
@@ -36,7 +37,18 @@ inline LogStats analyzeLogsSerial(const std::vector<std::string>& logs) {
                 stats.errorMessages[message]++;
             }
         }
-        if (line.find("WARNING") != std::string::npos) stats.warningCount++;
+        if (line.find("WARNING") != std::string::npos) {
+            stats.warningCount++;
+            // Extract warning message (text after IP address)
+            std::istringstream iss(line);
+            std::string date, time, level, ip, message;
+            iss >> date >> time >> level >> ip;
+            std::getline(iss, message);
+            message.erase(0, message.find_first_not_of(" \t")); // trim leading whitespace
+            if (!message.empty()) {
+                stats.warningMessages[message]++;
+            }
+        }
         if (line.find("DEBUG") != std::string::npos) stats.debugCount++;
         
         // Extract IP address (assuming format: date time level IP message)
@@ -78,7 +90,21 @@ inline LogStats analyzeLogsParallel(const std::vector<std::string>& logs, int nu
                 }
             }
         }
-        if (line.find("WARNING") != std::string::npos) warning++;
+        if (line.find("WARNING") != std::string::npos) {
+            warning++;
+            // Extract warning message (text after IP address)
+            std::istringstream iss(line);   
+            std::string date, time, level, ip, message;
+            iss >> date >> time >> level >> ip;
+            std::getline(iss, message);
+            message.erase(0, message.find_first_not_of(" \t")); // trim leading whitespace
+            if (!message.empty()) {
+                #pragma omp critical
+                {
+                    stats.warningMessages[message]++;
+                }
+            }
+        }
         if (line.find("DEBUG") != std::string::npos) debug++;
         
         // Extract IP address (assuming format: date time level IP message)
@@ -102,6 +128,10 @@ inline LogStats analyzeLogsParallel(const std::vector<std::string>& logs, int nu
 
 // --- Display Utility ---
 inline void displayResults(const LogStats &stats, int topN = 5) {
+    // Calculate total logs processed
+    int totalLogs = stats.infoCount + stats.errorCount + stats.warningCount + stats.debugCount;
+    std::cout << "Total logs processed: " << totalLogs << "\n";
+    
     std::cout << "\n=== Keyword Frequency ===\n";
     std::cout << "INFO    : " << stats.infoCount << "\n";
     std::cout << "ERROR   : " << stats.errorCount << "\n";
@@ -124,6 +154,15 @@ inline void displayResults(const LogStats &stats, int topN = 5) {
     std::cout << "\n=== Top Error Messages ===\n";
     for (int i = 0; i < (int)em.size() && i < topN; ++i) {
         std::cout << '\"' << em[i].first << "\" -> " << em[i].second << " times\n";
+    }
+
+    // Top Warning Messages
+    std::vector<std::pair<std::string,int>> wm(stats.warningMessages.begin(), stats.warningMessages.end());
+    std::sort(wm.begin(), wm.end(), [](const auto &a, const auto &b){ return a.second > b.second; });
+
+    std::cout << "\n=== Top Warning Messages ===\n";
+    for (int i = 0; i < (int)wm.size() && i < topN; ++i) {
+        std::cout << '\"' << wm[i].first << "\" -> " << wm[i].second << " times\n";
     }
 }
 

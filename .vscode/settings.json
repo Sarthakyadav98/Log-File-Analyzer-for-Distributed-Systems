@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "*.ejs": "html",
-        "system_error": "cpp"
-    }
+        "system_error": "cpp",
+        "unordered_map": "cpp"
+    },
+    "kiroAgent.configureMCP": "Disabled"
 }
