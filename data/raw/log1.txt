@@ -1,0 +1,5 @@
+2025-09-28 14:23:01 INFO 192.168.0.1 User login successful
+2025-09-28 14:24:15 ERROR 192.168.0.2 Database connection failed
+2025-09-28 14:26:43 WARNING 192.168.0.3 Disk usage high
+2025-09-28 15:01:12 ERROR 192.168.0.2 Timeout occurred
+2025-09-28 15:10:45 DEBUG 192.168.0.4 Debugging mode enabled

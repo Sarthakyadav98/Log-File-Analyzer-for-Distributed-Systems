@@ -1,7 +1,7 @@
 # ==============================
 # Parallel Log File Analyzer
 # ==============================
-CXX =  /opt/homebrew/bin/g++-15
+CXX ?= g++
 CXXFLAGS = -std=c++17 -fopenmp -O2 -Wall
 INCLUDES = -Iinclude
 SRC_DIR = src
@@ -13,6 +13,7 @@ PARALLEL = $(BIN_DIR)/parallel_analyzer
 BENCH = $(BIN_DIR)/benchmark
 MAIN = $(BIN_DIR)/main
 RUN_BENCH = $(BIN_DIR)/run_benchmark
+PREPROC = $(BIN_DIR)/preprocessor
 
 # Source files
 SRC_FILES = 
@@ -22,7 +23,7 @@ OBJS =
 $(shell mkdir -p $(BIN_DIR))
 
 # Build all
-all: $(SERIAL) $(PARALLEL) $(BENCH) $(MAIN) $(RUN_BENCH)
+all: $(SERIAL) $(PARALLEL) $(BENCH) $(MAIN) $(RUN_BENCH) $(PREPROC)
 
 $(SERIAL): $(SRC_DIR)/serial_analyzer.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@
@@ -39,9 +40,12 @@ $(MAIN): $(SRC_DIR)/main.cpp
 $(RUN_BENCH): $(SRC_DIR)/run_benchmark.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@
 
+preprocessor: src/preprocessor_main.cpp src/log_preprocessor.cpp
+	$(CXX) $(CXXFLAGS) -std=c++17 -o bin/preprocessor src/preprocessor_main.cpp src/log_preprocessor.cpp $(INCLUDES)
+
 # Clean up
 clean:
-	rm -rf $(BIN_DIR)/*.o $(BIN_DIR)/serial_analyzer $(BIN_DIR)/parallel_analyzer $(BIN_DIR)/benchmark $(BIN_DIR)/main $(BIN_DIR)/run_benchmark
+	rm -rf $(BIN_DIR)/*.o $(BIN_DIR)/serial_analyzer $(BIN_DIR)/parallel_analyzer $(BIN_DIR)/benchmark $(BIN_DIR)/main $(BIN_DIR)/run_benchmark $(BIN_DIR)/preprocessor
 
 # Run options
 run-serial: $(SERIAL)
@@ -58,6 +62,9 @@ run-main: $(MAIN)
 
 run-bench-all: $(RUN_BENCH)
 	@$(RUN_BENCH)
+
+run-preprocessor: preprocessor
+	@$(PREPROC)
 
 # Help
 help:

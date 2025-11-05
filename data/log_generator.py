@@ -83,7 +83,7 @@ def main():
     print("Generating log files of different sizes...")
     for filename, num_lines in sizes.items():
         print(f"Generating {filename} with {num_lines:,} lines...")
-        generate_log_file(f"data/{filename}", num_lines)
+        generate_log_file(f"data/raw/{filename}", num_lines)
     
     print("\nAll log files generated successfully!")
 
