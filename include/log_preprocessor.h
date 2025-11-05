@@ -11,8 +11,14 @@ struct LogEntry {
     std::string message;
 };
 
-std::vector<LogEntry> preprocessLogFile(const std::string &inputPath);
+struct PreprocessStats {
+    std::size_t totalFiles = 0;
+    std::size_t totalLines = 0;
+    std::size_t validLines = 0;
+};
+
+std::vector<LogEntry> preprocessLogFile(const std::string &inputPath, std::size_t &totalLinesOut, std::size_t &validLinesOut);
 void writeProcessedLogs(const std::vector<LogEntry> &logs, const std::string &outputPath);
-void preprocessAllLogs(const std::string &inputDir, const std::string &outputDir);
+PreprocessStats preprocessAllLogs(const std::string &inputDir, const std::string &outputDir);
 
 #endif

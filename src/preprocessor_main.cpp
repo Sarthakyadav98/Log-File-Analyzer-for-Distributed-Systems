@@ -1,6 +1,7 @@
 // Entry point for the log preprocessor tool
 #include "../include/log_preprocessor.h"
 #include <iostream>
+#include <omp.h>
 
 int main(int argc, char* argv[]) {
     if (argc < 3) {
@@ -13,6 +14,7 @@ int main(int argc, char* argv[]) {
 
     try {
         preprocessAllLogs(inputDir, outputDir);
+        // Note: Detailed timing printed inside preprocessAllLogs
     } catch (const std::exception &ex) {
         std::cerr << "[ERROR] Preprocessing failed: " << ex.what() << "\n";
         return 2;

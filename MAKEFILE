@@ -43,8 +43,8 @@ $(MAIN): $(SRC_DIR)/main.cpp
 $(RUN_BENCH): $(SRC_DIR)/run_benchmark.cpp
 	$(CXX) $(CXXFLAGS) $(INCLUDES) $^ -o $@
 
-preprocessor: src/preprocessor_main.cpp src/log_preprocessor.cpp
-	$(CXX) $(CXXFLAGS) -std=c++17 -o bin/preprocessor src/preprocessor_main.cpp src/log_preprocessor.cpp $(INCLUDES)
+$(PREPROC): $(SRC_DIR)/preprocessor_main.cpp $(SRC_DIR)/log_preprocessor.cpp
+	$(CXX) $(CXXFLAGS) $(INCLUDES) -o $@ $^
 
 # Clean up
 clean:
@@ -66,7 +66,7 @@ run-main: $(MAIN)
 run-bench-all: $(RUN_BENCH)
 	@$(RUN_BENCH)
 
-run-preprocessor: preprocessor
+run-preprocessor: $(PREPROC)
 	@$(PREPROC) $(RAW_DIR) $(CLEAN_DIR)
 
 # Convenience alias
