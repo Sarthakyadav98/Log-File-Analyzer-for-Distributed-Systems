@@ -15,7 +15,7 @@ int main() {
     double time = t.elapsed();
 
     cout << "\n=== PARALLEL ANALYSIS ===\n";
-    displayResults(result);
+    displayResults(result, logs);
     cout << "\nExecution Time: " << time << " seconds\n";
     return 0;
 }

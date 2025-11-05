@@ -19,7 +19,7 @@ int main() {
     else result = analyzeLogsParallel(logs);
 
     double time = t.elapsed();
-    displayResults(result);
+    displayResults(result, logs);
     cout << "\nExecution Time: " << time << " seconds\n";
     return 0;
 }
