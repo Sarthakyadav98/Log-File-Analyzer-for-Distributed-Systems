@@ -24,13 +24,11 @@ struct BenchmarkResult {
 int main(int argc, char* argv[]) {
     // Define log files to benchmark (in order of increasing size)
     vector<string> logFiles = {
-        "data/log1.txt",
-        "data/log2.txt",
-        "data/log_small.txt",
-        "data/log_medium.txt",
-        "data/log_large.txt",
-        "data/log_xlarge.txt",
-        "data/log_xxlarge.txt"
+        "data/clean/log_small.txt",
+        "data/clean/log_medium.txt",
+        "data/clean/log_large.txt",
+        "data/clean/log_xlarge.txt",
+        "data/clean/log_xxlarge.txt"
     };
     
     vector<BenchmarkResult> results;
